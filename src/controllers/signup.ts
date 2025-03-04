@@ -3,11 +3,10 @@ import { Bytes, doc, getFirestore, writeBatch } from "firebase/firestore";
 import { auth } from "../config/firebase";
 import {
   getUser,
-  getWalletKeyPath,
   WALLET_PARTNER_KEY,
 } from "../services/user";
 import { UserModel, WalletKeyModel, WalletModel } from "../types";
-import { decrypt, objectToUint8Array } from "../helpers";
+import { decrypt, getWalletKeyPath, objectToUint8Array } from "../helpers";
 
 export const signUp = async (req: Request, res: Response): Promise<any> => {
   const start = Date.now(); // Start time
@@ -19,20 +18,18 @@ export const signUp = async (req: Request, res: Response): Promise<any> => {
     userInfo,
   } = req.body;
 
-  const verifyCode = req.headers?.verifycode as string;
-  const decodeWalletKey = decrypt(walletKey, verifyCode);
-  const decodeWalletKeyObj= JSON.parse(decodeWalletKey)
-
-  console.log('decodeWalletKeyObj', decodeWalletKeyObj)
-
   // validate payload
-  if (!wallets || !walletKey) {
+  if (!wallets || !walletKey || !partnerKey || !userInfo) {
     res.status(400).json({
       success: false,
       message: "Bad request",
     });
     return;
   }
+
+  const verifyCode = req.headers?.verifycode as string;
+  const decodeWalletKey = decrypt(walletKey, verifyCode);
+  const decodeWalletKeyObj = JSON.parse(decodeWalletKey);
 
   // validate user exists
   const userModel = await getUser(uid);
@@ -47,7 +44,10 @@ export const signUp = async (req: Request, res: Response): Promise<any> => {
   // create user
   await insertNewUser(userInfo, partnerKey, wallets, {
     ...decodeWalletKeyObj,
-    dek: objectToUint8Array(decodeWalletKeyObj.dek),
+    dek:
+      typeof decodeWalletKeyObj.dek === "object"
+        ? objectToUint8Array(decodeWalletKeyObj.dek)
+        : decodeWalletKeyObj.dek,
   });
 
   const end = Date.now(); // End time
@@ -94,7 +94,6 @@ const insertNewUser = async (
     return newUser;
   }
 
-  
   // Should save the wallet as well.
   if (walletKey) {
     console.log("walletKey", Bytes.fromUint8Array(walletKey.dek));

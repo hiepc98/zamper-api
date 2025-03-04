@@ -1,4 +1,6 @@
 import * as crypto from 'crypto-js'
+import { Bytes } from 'firebase/firestore';
+import { PARTNER_KEY } from '../services/user';
 
 export interface DEKEncryptor {
   encrypt(plaintext: Uint8Array, dek: Uint8Array): string
@@ -114,3 +116,41 @@ export function objectToUint8Array(obj: Record<string, number>): Uint8Array {
   
   return uint8Array
 }
+
+export const formatDek = (walletData: any) => {
+  return (walletData!.dek as Bytes).toUint8Array();
+};
+
+
+export const getWalletKeyPath = (
+  UID: string | undefined,
+  walletId: string | undefined,
+  walletKeyFirebase = "default"
+): Array<string> => {
+  if (walletKeyFirebase === "[DEFAULT]") {
+    walletKeyFirebase = "default";
+  }
+
+  if (!UID) {
+    if (!Object.values(PARTNER_KEY).includes(walletKeyFirebase)) {
+      return [walletKeyFirebase];
+    } else {
+      return [walletKeyFirebase];
+    }
+  }
+
+  // check if walletKeyFirebase is not in PARTNER_KEY
+  if (!Object.values(PARTNER_KEY).includes(walletKeyFirebase)) {
+    if (!walletId) {
+      return [UID, "walletList", walletKeyFirebase];
+    }
+
+    return [UID, "walletList", walletKeyFirebase, "walletkey", walletId];
+  } else {
+    if (!walletId) {
+      return [UID, "walletList", walletKeyFirebase];
+    }
+
+    return [UID, "walletList", walletKeyFirebase, "walletkey", walletId];
+  }
+};

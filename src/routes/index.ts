@@ -5,7 +5,7 @@ import { authenticateFirebase } from "../middleware/index";
 
 const router = Router();
 
-router.post("/signin", authenticateFirebase, signIn);
+router.get("/get-profile", authenticateFirebase, signIn);
 router.post("/signup", authenticateFirebase, signUp);
 
 export default router;
