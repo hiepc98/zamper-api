@@ -42,7 +42,7 @@ export const signUp = async (req: Request, res: Response): Promise<any> => {
   }
 
   // create user
-  await insertNewUser(userInfo, partnerKey, wallets, {
+  await insertNewUser({...userInfo, UID: uid}, partnerKey, wallets, {
     ...decodeWalletKeyObj,
     dek:
       typeof decodeWalletKeyObj.dek === "object"

@@ -7,7 +7,7 @@ const FIREBASE_PROJECT_ID = firebaseConfig.projectId;
 const FIREBASE_PUBLIC_KEYS_URL = `https://www.googleapis.com/service_accounts/v1/metadata/x509/securetoken@system.gserviceaccount.com`;
 const secretKey = "ramper_verify";
 
-//   const verifyToken = jwt.sign(
+// const verifyToken = jwt.sign(
 //   {
 //     id: '3MB5fKm7u9XTPM1mXha2Gq1yK0m1',
 //     iss: 'https://ramper.xyz',
@@ -23,7 +23,6 @@ const secretKey = "ramper_verify";
 //     expiresIn: '60m'
 //   }
 // )
-// console.log('verifyToken', verifyToken)
 
 export const authenticateFirebase = async (
   req: Request,
